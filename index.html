@@ -1,6 +1,6 @@
 
 <div style="position:sticky;top:0;z-index:9999;padding:12px 18px;background:#0E1420;color:#fff;border-bottom:2px solid #4FB3A9;font-family:system-ui,sans-serif;direction:rtl;text-align:center">
-  <strong>PSIE GitHub Sandbox</strong> — هذه نسخة عامة للتجربة وفتح الموقع. رفع DXF الحي يحتاج تشغيل خادم QA المحلي/نشر backend؛ دعم PDF قادم مع المرحلة B. / Public static sandbox; live DXF processing needs the QA backend.
+  <strong>PSIE GitHub Sandbox</strong> — هذه نسخة عامة للتجربة وفتح الموقع. رفع DXF/PDF الحي يحتاج نشر backend؛ دعم PDF الحقيقي قادم مع المرحلة B. / Public static sandbox; live DXF/PDF processing needs backend deployment.
 </div>
 <title>PSIE — Drafting Table</title>
 <style>
@@ -545,9 +545,9 @@
     <p class="subhead" data-i18n="sb.sub">دي مش محاكاة: ارفع ملف DXF خام (أو JSON مستخرج) والبوابة تشغّل الحصاد والتدقيق فعلياً على جهازك وتعرض الأرقام الحقيقية هنا — عائلات، علاقات ربطية، وتنبيهات الامتناع الثلاثية.</p>
     <div class="dropzone" id="sbDropzone" tabindex="0" role="button">
       <div class="icon">⌁</div>
-      <div class="primary" data-i18n="sb.drop.primary">اسحب ملف DXF أو JSON هنا أو دوس تختار</div>
-      <div class="secondary" data-i18n="sb.drop.secondary">.dxf خام · .json مستخرج — حتى 512MB · DXF يُحصد داخل الخادم مباشرة</div>
-      <input type="file" id="sbFileInput" accept=".dxf,.json,application/json">
+      <div class="primary" data-i18n="sb.drop.primary">اسحب ملف DXF أو JSON أو PDF هنا أو دوس تختار</div>
+      <div class="secondary" data-i18n="sb.drop.secondary">.dxf خام · .json مستخرج · .pdf للتنبيه الصادق — حتى 512MB</div>
+      <input type="file" id="sbFileInput" accept=".dxf,.json,.pdf,application/json,application/pdf">
     </div>
     <div class="file-list" id="sbFileList"></div>
     <div class="sandbox-actions">
@@ -695,8 +695,8 @@
       'sb.kicker':'الساند بوكس — البوابة الحقيقية',
       'sb.h2':'جرّب المنصة — Sandbox',
       'sb.sub':'دي مش محاكاة: ارفع ملف DXF خام (أو JSON مستخرج) والبوابة تشغّل الحصاد والتدقيق فعلياً على جهازك وتعرض الأرقام الحقيقية هنا — عائلات، علاقات ربطية، وتنبيهات الامتناع.',
-      'sb.drop.primary':'اسحب ملف DXF أو JSON هنا أو دوس تختار',
-      'sb.drop.secondary':'.dxf خام · .json مستخرج — حتى 512MB · الـDXF يُحصد داخل الخادم مباشرة',
+      'sb.drop.primary':'اسحب ملف DXF أو JSON أو PDF هنا أو دوس تختار',
+      'sb.drop.secondary':'.dxf خام · .json مستخرج · .pdf للتنبيه الصادق — حتى 512MB',
       'sb.analyze':'تحليل الآن',
       'sb.demo1':'⚡ ديمو معماري — THE HUB MALL',
       'sb.demo2':'⚡ ديمو إنشائي — SAFWA (LINKED)',
@@ -774,8 +774,8 @@
       'sb.kicker':'sandbox — the real gate',
       'sb.h2':'Try the platform — Sandbox',
       'sb.sub':'This is not a mock: upload a raw .dxf (or an extracted .json) and the gate runs the harvest and audit for real on your machine, rendering the actual numbers here — families, cross-family relations, and abstention alerts.',
-      'sb.drop.primary':'Drag a DXF or JSON file here, or click to choose',
-      'sb.drop.secondary':'raw .dxf · extracted .json — up to 512MB · DXF is harvested server-side',
+      'sb.drop.primary':'Drag a DXF, JSON, or PDF file here, or click to choose',
+      'sb.drop.secondary':'raw .dxf · extracted .json · .pdf for honest notice — up to 512MB',
       'sb.analyze':'Analyze now',
       'sb.demo1':'⚡ Architectural demo — THE HUB MALL',
       'sb.demo2':'⚡ Structural demo — SAFWA (LINKED)',
@@ -994,7 +994,9 @@
      TODO(deploy): see the comment block above the #sandbox section —
      point SB_BASE at the production gateway when publishing.
      ===================================================================== */
-  var SB_BASE = '';  /* same origin; set to gateway URL at deploy time */
+  var SB_BASE = window.PSIE_BACKEND_URL || '';  /* same origin locally; set to gateway URL at deploy time */
+  var SB_STATIC_GITHUB = /\.github\.io$/i.test(location.hostname);
+  var sbBackendOnline = false;
   var sbDrop = document.getElementById('sbDropzone');
   var sbInput = document.getElementById('sbFileInput');
   var sbList = document.getElementById('sbFileList');
@@ -1026,13 +1028,21 @@
   function sbCheckServer(){
     if(location.protocol === 'file:'){
       sbSetWarn('<b>' + sbT('sb.warn.file', 'file://') + '</b>');
-      sbAnalyze.disabled = true; sbAnalyze.title = 'server';
+      sbAnalyze.disabled = false; sbAnalyze.title = 'offline';
       return;
     }
-    fetch(SB_BASE + '/health').then(function(r){ if(!r.ok) throw 0; sbSetWarn(''); })
+    if(SB_STATIC_GITHUB && !window.PSIE_BACKEND_URL){
+      sbSetWarn('<b>' + (sbLang() === 'ar'
+        ? 'نسخة GitHub دي بتفتح الموقع فقط. تحليل DXF/PDF الحقيقي يحتاج نشر backend؛ PDF قادم مع المرحلة B — لن نعرض أرقاماً مخترعة.'
+        : 'This GitHub build opens the site only. Real DXF/PDF analysis needs a deployed backend; PDF arrives with Phase B — no fabricated numbers.') + '</b>');
+      sbAnalyze.disabled = false; sbAnalyze.title = 'static-github';
+      return;
+    }
+    fetch(SB_BASE + '/health').then(function(r){ if(!r.ok) throw 0; sbBackendOnline = true; sbSetWarn(''); })
       .catch(function(){
+        sbBackendOnline = false;
         sbSetWarn('<b>' + sbT('sb.warn.offline', 'offline') + '</b>');
-        sbAnalyze.disabled = true; sbAnalyze.title = 'server';
+        sbAnalyze.disabled = false; sbAnalyze.title = 'server';
       });
   }
   sbCheckServer();
@@ -1163,7 +1173,17 @@
     sbResult.innerHTML = '';
     sbBusyShow(true);
     var t0 = Date.now();
-    fetch(url, body).then(function(r){ return r.json(); }).then(function(j){
+    fetch(SB_BASE + url, body).then(function(r){
+      var ct = (r.headers.get('content-type') || '').toLowerCase();
+      return r.text().then(function(txt){
+        if(ct.indexOf('application/json') === -1){
+          throw new Error(sbLang() === 'ar'
+            ? 'الخادم رجّع صفحة HTML بدل JSON — غالباً backend غير منشور/غير شغال. لا توجد أرقام تحليل.'
+            : 'Server returned HTML instead of JSON — backend is probably not deployed/running. No audit numbers.');
+        }
+        return JSON.parse(txt);
+      });
+    }).then(function(j){
       sbBusyShow(false);
       if(j && (j.status === 'ERROR' || j.status === 'UNSUPPORTED_FORMAT')){
         sbRenderError(j.message || (typeof j === 'string' ? j : JSON.stringify(j)));
@@ -1173,7 +1193,7 @@
       sbRenderReport(j, sourceLabel);
     }).catch(function(e){
       sbBusyShow(false);
-      sbRenderError((sbLang() === 'ar' ? 'خطأ شبكة / network error: ' : 'network error: ') + e);
+      sbRenderError((sbLang() === 'ar' ? 'الخادم غير متاح / backend unavailable: ' : 'backend unavailable: ') + e.message);
     });
   }
 
@@ -1184,15 +1204,28 @@
     var name = (sbFile.name || '').toLowerCase();
     var isDxf = name.endsWith('.dxf');
     var isJson = name.endsWith('.json');
+    var isPdf = name.endsWith('.pdf');
     var ar = sbLang() === 'ar';
     var label = isDxf
       ? (ar ? 'ملف DXF خام — حصاد داخلي' : 'raw DXF file — server-side harvest')
       : (ar ? 'ملف JSON مستخرج' : 'extracted JSON file');
+    if(isPdf){
+      sbRenderError(ar
+        ? 'ملف PDF اتقبل في الواجهة عشان التجربة تكون واضحة، لكن تحليل PDF الحقيقي لسه غير مفعّل: نواة PDF→CAD هي المرحلة B. لن نعرض أرقاماً مخترعة. حالياً جرّب DXF أو انتظر نشر backend/Nucleus PDF.'
+        : 'PDF is accepted by the UI for a clear trial, but real PDF analysis is not enabled yet: the PDF→CAD nucleus is Phase B. No fabricated numbers. For now try DXF or wait for backend/PDF nucleus deployment.');
+      return;
+    }
     if(!isDxf && !isJson){
       /* honest client-side pre-rejection, mirrors the server message */
       sbRenderError(ar
-        ? 'الامتداد ده غير مدعوم — دعم PDF قادم مع النواة (المرحلة ب) — حالياً ارفع DXF أو JSON'
-        : 'This extension is not supported — PDF support arrives with the Phase B nucleus — for now upload DXF or JSON');
+        ? 'الامتداد ده غير مدعوم — حالياً ارفع DXF أو JSON. دعم PDF قادم مع النواة (المرحلة ب).'
+        : 'This extension is not supported — for now upload DXF or JSON. PDF support arrives with the Phase B nucleus.');
+      return;
+    }
+    if((SB_STATIC_GITHUB && !window.PSIE_BACKEND_URL) || location.protocol === 'file:'){
+      sbRenderError(ar
+        ? 'الموقع مفتوح، لكن التحليل الحقيقي يحتاج backend شغال. GitHub Pages لا يشغّل Python، لذلك لا يمكن تحليل DXF/PDF من هذا الرابط حالياً ولا نعرض أرقاماً وهمية.'
+        : 'The site is open, but real analysis needs a running backend. GitHub Pages cannot run Python, so DXF/PDF analysis is not available from this link yet and no fake numbers are shown.');
       return;
     }
     sbRun(isDxf ? '/upload-dxf' : '/upload',
@@ -1201,11 +1234,23 @@
   });
   document.getElementById('sbDemo').addEventListener('click', function(){
     var ar = sbLang() === 'ar';
+    if((SB_STATIC_GITHUB && !window.PSIE_BACKEND_URL) || location.protocol === 'file:'){
+      sbRenderError(ar
+        ? 'الديمو يحتاج backend شغال عشان يعرض أرقاماً حقيقية. نسخة GitHub الحالية ثابتة فقط — لا أرقام مخترعة.'
+        : 'The demo needs a running backend to show real numbers. This GitHub build is static only — no fabricated numbers.');
+      return;
+    }
     sbRun('/demo', { method: 'GET', headers: { 'Accept': 'application/json' } },
       ar ? 'ملف تجريبي — THE HUB MALL (معماري)' : 'demo file — THE HUB MALL (architectural)');
   });
   document.getElementById('sbDemoStruct').addEventListener('click', function(){
     var ar = sbLang() === 'ar';
+    if((SB_STATIC_GITHUB && !window.PSIE_BACKEND_URL) || location.protocol === 'file:'){
+      sbRenderError(ar
+        ? 'الديمو الإنشائي يحتاج backend شغال عشان يعرض أرقاماً حقيقية. نسخة GitHub الحالية ثابتة فقط — لا أرقام مخترعة.'
+        : 'The structural demo needs a running backend to show real numbers. This GitHub build is static only — no fabricated numbers.');
+      return;
+    }
     sbRun('/demo-structural', { method: 'GET', headers: { 'Accept': 'application/json' } },
       ar ? 'ملف تجريبي — SAFWA COLUMNS (إنشائي)' : 'demo file — SAFWA COLUMNS (structural)');
   });
