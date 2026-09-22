@@ -1,0 +1,1480 @@
+<title>PSIE — Drafting Table</title>
+<style>
+  :root{
+    --bg:#0E1420;
+    --surface:#151C2B;
+    --surface-2:#1B2436;
+    --surface-3:#212B40;
+    --line-confirmed:#EDE7DA;
+    --line-pending:#C9924B;
+    --line-ambiguous:#D97757;
+    --accent:#4FB3A9;
+    --accent-dim:rgba(79,179,169,.14);
+    --text:#E7E4DA;
+    --text-muted:#7C8AA3;
+    --text-faint:#57647E;
+    --hairline:#2A3448;
+    --font-display:'Big Shoulders Display',system-ui,sans-serif;
+    --font-body:'Public Sans',system-ui,-apple-system,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'SF Mono',monospace;
+    --font-ar:'IBM Plex Sans Arabic','Public Sans',system-ui,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{background:var(--bg);}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    padding-inline:20px;
+    padding-block:0 0;
+  }
+  html[lang="ar"] body{font-family:var(--font-ar);}
+  html[lang="ar"] .mono, html[lang="ar"] .ltr{font-family:var(--font-mono);direction:ltr;unicode-bidi:isolate;display:inline-block;}
+
+  .wrap{max-width:1040px;margin-inline:auto;display:flex;flex-direction:column;gap:72px;padding-block:28px 72px;}
+
+  a{color:inherit;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding-block:14px;
+    position:sticky;top:env(safe-area-inset-top,0px);
+    background:linear-gradient(var(--bg) 70%, transparent);
+    z-index:20;
+  }
+  .brand{display:flex;align-items:baseline;gap:8px;font-family:var(--font-mono);font-size:13px;letter-spacing:.06em;color:var(--text);}
+  .brand b{color:var(--accent);font-weight:600;}
+  .lang-toggle{
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.03em;
+    display:flex;border:1px solid var(--hairline);border-radius:3px;overflow:hidden;
+  }
+  .lang-toggle button{
+    background:transparent;border:none;color:var(--text-muted);padding:7px 12px;cursor:pointer;font-family:inherit;font-size:inherit;
+  }
+  .lang-toggle button[aria-pressed="true"]{background:var(--accent-dim);color:var(--accent);}
+
+  /* ---------- header ---------- */
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 10px;
+  }
+  html[lang="ar"] .eyebrow{letter-spacing:.02em;}
+  h1{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(40px,7vw,72px);
+    line-height:.94;
+    letter-spacing:.005em;
+    text-wrap:balance;
+    margin:0 0 18px;
+    color:var(--line-confirmed);
+  }
+  html[lang="ar"] h1{font-family:var(--font-ar);font-weight:700;letter-spacing:0;line-height:1.12;}
+  .lede{
+    font-size:17px;
+    line-height:1.6;
+    color:var(--text-muted);
+    max-width:62ch;
+    margin:0;
+  }
+  .lede strong{color:var(--text);font-weight:600;}
+
+  section h2{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(26px,3.4vw,36px);
+    margin:0 0 6px;
+    color:var(--line-confirmed);
+    text-wrap:balance;
+  }
+  html[lang="ar"] section h2{font-family:var(--font-ar);font-weight:700;}
+  section .kicker{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;}
+  html[lang="ar"] section .kicker{letter-spacing:.02em;}
+  section .subhead{font-size:15px;line-height:1.65;color:var(--text-muted);max-width:66ch;margin:0 0 28px;}
+
+  /* ---------- stage of matter (demo) ---------- */
+  .studio{
+    display:grid;
+    grid-template-columns:1.55fr 1fr;
+    gap:1px;
+    background:var(--hairline);
+    border:1px solid var(--hairline);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  @media (max-width:760px){ .studio{grid-template-columns:1fr;} }
+
+  .canvas-pane{
+    background:var(--surface);
+    padding:18px 18px 0;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .canvas-frame{
+    position:relative;
+    border-radius:2px;
+    overflow:hidden;
+    aspect-ratio:800/620;
+  }
+  .canvas-frame svg{display:block;width:100%;height:100%;}
+
+  .stage-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding-block:14px 18px;
+    border-top:1px solid var(--hairline);
+    font-family:var(--font-mono);
+  }
+  .stage-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .stage-name{
+    font-size:13px;
+    color:var(--line-confirmed);
+    letter-spacing:.02em;
+  }
+  .stage-name b{color:var(--accent);font-weight:600;}
+  .stage-index{font-size:12px;color:var(--text-muted);}
+
+  .sound-btn{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.04em;
+    color:var(--text-muted);
+    background:transparent;
+    border:1px solid var(--hairline);
+    border-radius:2px;
+    padding:4px 9px;
+    cursor:pointer;
+    transition:color .2s ease,border-color .2s ease;
+  }
+  .sound-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);}
+  .sound-btn:hover{color:var(--text);}
+
+  .legend{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    padding:14px 18px;
+    background:var(--surface-2);
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--text-muted);
+  }
+  .legend span{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
+  .swatch{width:16px;height:2px;border-radius:1px;display:inline-block;}
+  .swatch.confirmed{background:var(--line-confirmed);}
+  .swatch.pending{background:repeating-linear-gradient(90deg,var(--line-pending) 0 4px,transparent 4px 7px);}
+  .swatch.ambiguous{background:repeating-linear-gradient(90deg,var(--line-ambiguous) 0 3px,transparent 3px 6px);}
+
+  /* ---------- evidence ledger ---------- */
+  .ledger{background:var(--surface);display:flex;flex-direction:column;}
+  .ledger-head{padding:18px 18px 14px;border-bottom:1px solid var(--hairline);}
+  .ledger-head h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0 0 4px;color:var(--line-confirmed);}
+  html[lang="ar"] .ledger-head h3{font-family:var(--font-ar);}
+  .ledger-head p{margin:0;font-size:12.5px;color:var(--text-muted);}
+
+  .ledger-feed{
+    flex:1;min-height:280px;max-height:420px;overflow:hidden;position:relative;
+    padding:14px 18px;display:flex;flex-direction:column;gap:9px;
+    font-family:var(--font-mono);font-size:12px;
+  }
+  .ledger-feed::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(var(--surface) 0%, transparent 14%, transparent 82%, var(--surface) 100%);
+    pointer-events:none;
+  }
+  .entry{display:flex;gap:9px;align-items:baseline;opacity:0;transform:translateY(4px);animation:entry-in .5s ease forwards;line-height:1.5;direction:ltr;text-align:left;}
+  @keyframes entry-in{to{opacity:1;transform:translateY(0);}}
+  .entry .tag{flex:none;font-size:9.5px;letter-spacing:.05em;padding:2px 6px;border-radius:2px;font-weight:600;}
+  .tag.CONFIRMED{background:rgba(237,231,218,.14);color:var(--line-confirmed);}
+  .tag.LIKELY{background:rgba(201,146,75,.16);color:var(--line-pending);}
+  .tag.AMBIGUOUS{background:rgba(217,119,87,.16);color:var(--line-ambiguous);}
+  .entry .msg{color:var(--text-muted);}
+  .entry .msg b{color:var(--text);font-weight:500;}
+
+  /* ---------- pipeline strip ---------- */
+  .pipeline{display:flex;flex-direction:column;gap:16px;}
+  .steps{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--hairline);border:1px solid var(--hairline);}
+  @media (max-width:700px){ .steps{grid-template-columns:repeat(3,1fr);} }
+  .step{background:var(--surface);padding:14px 12px;display:flex;flex-direction:column;gap:6px;transition:background .4s ease;}
+  .step.active{background:var(--surface-2);}
+  .step .n{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);}
+  .step.active .n{color:var(--accent);}
+  .step .t{font-size:12.5px;color:var(--text);line-height:1.35;}
+
+  /* ---------- log / story ---------- */
+  .log{display:flex;flex-direction:column;border-top:1px solid var(--hairline);}
+  .log-entry{display:grid;grid-template-columns:120px 1fr;gap:24px;padding-block:26px;border-bottom:1px solid var(--hairline);}
+  @media (max-width:640px){ .log-entry{grid-template-columns:1fr;gap:8px;} }
+  .log-date{font-family:var(--font-mono);font-size:12.5px;color:var(--accent);letter-spacing:.04em;padding-top:2px;}
+  .log-body h4{font-family:var(--font-display);font-size:19px;font-weight:600;margin:0 0 8px;color:var(--line-confirmed);}
+  html[lang="ar"] .log-body h4{font-family:var(--font-ar);font-weight:700;}
+  .log-body p{margin:0;font-size:14.5px;line-height:1.7;color:var(--text-muted);max-width:64ch;}
+  .log-body p b{color:var(--text);font-weight:600;}
+  .log-tag{display:inline-block;font-family:var(--font-mono);font-size:10px;letter-spacing:.05em;color:var(--text-faint);border:1px solid var(--hairline);border-radius:2px;padding:2px 7px;margin-top:12px;direction:ltr;}
+
+  /* ---------- evidence cards ---------- */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hairline);border:1px solid var(--hairline);}
+  @media (max-width:760px){ .cards{grid-template-columns:1fr;} }
+  .card{background:var(--surface);padding:22px 20px;display:flex;flex-direction:column;gap:10px;}
+  .card .claim{font-size:14.5px;line-height:1.5;color:var(--text);font-weight:500;}
+  .card .proof{font-family:var(--font-mono);font-size:12px;color:var(--accent);line-height:1.6;direction:ltr;text-align:left;padding-top:6px;border-top:1px dashed var(--hairline);}
+  html[lang="ar"] .card .proof{text-align:left;}
+  .card .rule{font-family:var(--font-mono);font-size:10px;color:var(--text-faint);letter-spacing:.04em;direction:ltr;}
+
+  /* ---------- upload ---------- */
+  .dropzone{
+    border:1.5px dashed var(--hairline);border-radius:3px;padding:36px 24px;
+    display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;
+    background:var(--surface);cursor:pointer;transition:border-color .2s ease,background .2s ease;
+  }
+  .dropzone.drag{border-color:var(--accent);background:var(--accent-dim);}
+  .dropzone .icon{font-family:var(--font-mono);font-size:26px;color:var(--text-faint);}
+  .dropzone .primary{font-size:14.5px;color:var(--text);font-weight:500;}
+  .dropzone .secondary{font-size:12.5px;color:var(--text-muted);}
+  .dropzone input{display:none;}
+  .file-list{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+  .file-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 14px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:2px;
+    font-family:var(--font-mono);font-size:12px;
+  }
+  .file-row .name{color:var(--text);direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .file-row .size{color:var(--text-muted);flex:none;}
+  .file-row .remove{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:14px;flex:none;padding:0 4px;}
+  .file-row .remove:hover{color:var(--line-ambiguous);}
+  .upload-note{font-size:12.5px;color:var(--text-faint);margin-top:14px;line-height:1.6;max-width:60ch;}
+  .upload-note b{color:var(--line-pending);font-weight:600;}
+
+  /* ---------- sandbox (real QA-Check gate) ---------- */
+  .sandbox-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+  .sb-btn{
+    font-family:var(--font-mono);font-size:12.5px;letter-spacing:.03em;
+    background:var(--accent-dim);color:var(--accent);
+    border:1px solid var(--accent);border-radius:3px;
+    padding:11px 18px;cursor:pointer;
+  }
+  .sb-btn.primary{background:var(--accent);color:#08211E;font-weight:600;border-color:var(--accent);}
+  .sb-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .sb-note{font-size:12.5px;color:var(--text-faint);margin-top:14px;line-height:1.7;max-width:70ch;}
+  .sb-note b{color:var(--line-pending);font-weight:600;}
+  .sb-note code{font-family:var(--font-mono);font-size:11.5px;color:var(--accent);direction:ltr;unicode-bidi:isolate;display:inline-block;}
+  #sbServerWarn{display:none;border:1px solid var(--line-pending);border-radius:3px;background:rgba(201,146,75,.10);color:var(--line-pending);padding:12px 16px;font-size:13px;line-height:1.8;margin-top:14px;}
+  #sbBusy{display:none;margin-top:18px;padding:18px;border:1px solid var(--hairline);border-radius:3px;background:var(--surface-2);}
+  #sbBusy .t{font-size:14px;color:var(--text);}
+  #sbBusy .e{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);margin-top:8px;direction:ltr;text-align:left;}
+  .sb-spin{display:inline-block;width:14px;height:14px;border:2px solid var(--hairline);border-top-color:var(--accent);border-radius:50%;animation:sbspin 1s linear infinite;vertical-align:-2px;margin-inline-end:8px;}
+  @keyframes sbspin{to{transform:rotate(360deg)}}
+  #sbResult{margin-top:18px;}
+  .sb-report{border:1px solid var(--hairline);border-radius:3px;background:var(--surface);padding:22px;display:flex;flex-direction:column;gap:18px;}
+  .sb-meta{font-family:var(--font-mono);font-size:11.5px;color:var(--text-muted);line-height:1.9;direction:ltr;text-align:left;}
+  .sb-meta b{color:var(--text);font-weight:600;}
+  .sb-banner{border-right:3px solid var(--line-pending);background:rgba(201,146,75,.10);padding:12px 16px;font-size:13.5px;line-height:1.8;color:var(--text);}
+  .sb-banner.error{border-right-color:var(--line-ambiguous);background:rgba(217,119,87,.10);color:#F0B4A2;white-space:pre-wrap;}
+  .sb-banner.ok{border-right-color:var(--accent);background:var(--accent-dim);}
+  .sb-sub{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--line-confirmed);margin:0 0 8px;}
+  html[lang="ar"] .sb-sub{font-family:var(--font-ar);}
+  .sb-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .sb-table th,.sb-table td{padding:8px 10px;border-bottom:1px solid var(--hairline);}
+  .sb-table th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);text-align:start;font-weight:500;}
+  .sb-table td.num{font-family:var(--font-mono);font-size:12px;direction:ltr;text-align:left;}
+  .sb-table tr.flag td{background:rgba(217,119,87,.07);}
+  .sb-ok{color:var(--accent);} .sb-warn{color:var(--line-pending);} .sb-bad{color:var(--line-ambiguous);}
+  .sb-summary{border-right:3px solid var(--accent);background:var(--surface-2);border-radius:2px;padding:10px 14px;font-size:13.5px;line-height:1.8;}
+  .sb-empty{font-size:12.5px;color:var(--text-faint);}
+
+  /* ---------- register ---------- */
+  .register-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hairline);border:1px solid var(--hairline);}
+  @media (max-width:700px){ .register-grid{grid-template-columns:1fr;} }
+  .register-form{background:var(--surface);padding:26px;display:flex;flex-direction:column;gap:14px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-family:var(--font-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);}
+  html[lang="ar"] .field label{letter-spacing:.01em;}
+  .field input,.field textarea,.field select{
+    background:var(--surface-2);border:1px solid var(--hairline);border-radius:2px;
+    color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 12px;
+    outline:none;transition:border-color .2s ease;
+  }
+  html[lang="ar"] .field input,html[lang="ar"] .field textarea,html[lang="ar"] .field select{font-family:var(--font-ar);}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
+  .field textarea{resize:vertical;min-height:70px;font-family:inherit;}
+  .submit-btn{
+    background:var(--accent);color:#0B1119;border:none;border-radius:2px;
+    font-family:var(--font-mono);font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;
+    padding:12px 18px;cursor:pointer;transition:opacity .2s ease;font-weight:600;
+  }
+  .submit-btn:hover{opacity:.88;}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .form-note{font-size:11.5px;color:var(--text-faint);line-height:1.6;}
+  .register-side{background:var(--surface-2);padding:26px;display:flex;flex-direction:column;gap:16px;justify-content:center;}
+  .register-side .stat{display:flex;flex-direction:column;gap:2px;}
+  .register-side .stat .v{font-family:var(--font-mono);font-size:22px;color:var(--accent);}
+  .register-side .stat .l{font-size:12px;color:var(--text-muted);}
+  .confirm-box{background:var(--surface);border:1px solid var(--accent);border-radius:3px;padding:20px;display:none;flex-direction:column;gap:6px;}
+  .confirm-box.show{display:flex;}
+  .confirm-box .t{font-size:14.5px;color:var(--text);font-weight:600;}
+  .confirm-box .s{font-size:12.5px;color:var(--text-muted);line-height:1.6;}
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--hairline);
+    padding-top:20px;
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--text-muted);
+    direction:ltr;
+  }
+  html[lang="ar"] footer{justify-content:space-between;}
+
+  @media (prefers-reduced-motion: reduce){
+    .anim{animation:none !important;}
+    .entry{animation:none !important;opacity:1;transform:none;}
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">PSIE <b>·</b> <span data-i18n="brand.tag">drafting table</span></div>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="ar" aria-pressed="true">AR · عربي</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN · English</button>
+    </div>
+  </div>
+
+  <header>
+    <p class="eyebrow" data-i18n="hero.eyebrow">interaction study</p>
+    <h1 data-i18n="hero.h1">بتترسم قدام عينيك.</h1>
+    <p class="lede" data-i18n-html="hero.lede">البرنامج طالع من أزمة حقيقية: يوم ضاع فيه الـ<strong>source file</strong> الأصلي، وراحت معاه أيام — وأحياناً أسابيع — بتحاول ترجّع الرسمة من غير ما تلاقيها. PSIE <strong>مش بيدّعي</strong> إنه هيوصّلك للملف اللي ضاع، بس هيقرّب عليك المسافة ويقصّر عليك المشوار... كتير 🙂</p>
+  </header>
+
+  <section class="studio">
+    <div class="canvas-pane">
+      <div class="canvas-frame">
+        <svg viewBox="0 0 800 620" xmlns="http://www.w3.org/2000/svg" aria-label="Floor plan reconstructing progressively">
+          <defs>
+            <pattern id="grain" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#2A3448" stroke-width="1" opacity=".35"/>
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="800" height="620" fill="var(--surface)"/>
+          <rect x="40" y="20" width="720" height="560" fill="url(#grain)" opacity=".5"/>
+
+          <g class="layer-grid anim" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="2 4" fill="none" opacity=".55">
+            <path pathLength="1" d="M120,40 L120,500"/>
+            <path pathLength="1" d="M420,40 L420,500"/>
+            <path pathLength="1" d="M680,40 L680,500"/>
+            <path pathLength="1" d="M80,80 L720,80"/>
+            <path pathLength="1" d="M80,280 L720,280"/>
+            <path pathLength="1" d="M80,460 L720,460"/>
+          </g>
+          <g class="layer-grid anim" font-family="var(--font-mono)" font-size="13" fill="var(--text-muted)" opacity=".8">
+            <circle cx="120" cy="40" r="11" fill="none" stroke="var(--text-muted)" stroke-width="1"/>
+            <text x="120" y="44" text-anchor="middle">A</text>
+            <circle cx="420" cy="40" r="11" fill="none" stroke="var(--text-muted)" stroke-width="1"/>
+            <text x="420" y="44" text-anchor="middle">B</text>
+            <circle cx="680" cy="40" r="11" fill="none" stroke="var(--text-muted)" stroke-width="1"/>
+            <text x="680" y="44" text-anchor="middle">C</text>
+            <circle cx="80" cy="80" r="11" fill="none" stroke="var(--text-muted)" stroke-width="1"/>
+            <text x="80" y="84" text-anchor="middle">1</text>
+            <circle cx="80" cy="280" r="11" fill="none" stroke="var(--text-muted)" stroke-width="1"/>
+            <text x="80" y="284" text-anchor="middle">2</text>
+            <circle cx="80" cy="460" r="11" fill="none" stroke="var(--text-muted)" stroke-width="1"/>
+            <text x="80" y="464" text-anchor="middle">3</text>
+          </g>
+
+          <g class="layer-walls anim" stroke="var(--line-confirmed)" stroke-width="6" stroke-linecap="square" fill="none">
+            <path pathLength="1" d="M120,80 L520,80"/>
+            <path pathLength="1" d="M580,80 L680,80"/>
+            <path pathLength="1" d="M680,80 L680,460"/>
+            <path pathLength="1" d="M680,460 L230,460"/>
+            <path pathLength="1" d="M180,460 L120,460"/>
+            <path pathLength="1" d="M120,460 L120,240"/>
+            <path pathLength="1" d="M120,180 L120,80"/>
+            <path pathLength="1" d="M420,80 L420,150"/>
+            <path pathLength="1" d="M420,200 L420,460"/>
+            <path pathLength="1" d="M420,280 L545,280"/>
+            <path pathLength="1" d="M595,280 L680,280"/>
+          </g>
+
+          <g class="layer-walls anim" stroke="var(--line-confirmed)" stroke-width="2.5" fill="none" opacity=".85">
+            <path pathLength="1" d="M520,80 L580,80"/>
+            <path pathLength="1" d="M120,180 L120,240"/>
+          </g>
+
+          <g class="layer-openings anim" stroke="var(--accent)" stroke-width="1.6" fill="none" opacity=".85">
+            <path pathLength="1" d="M230,460 L230,410 A50,50 0 0 0 180,460"/>
+            <path pathLength="1" d="M420,150 L470,150 A50,50 0 0 1 420,200"/>
+            <path pathLength="1" d="M545,280 L545,330 A50,50 0 0 0 595,280"/>
+          </g>
+
+          <g class="layer-rooms anim">
+            <rect x="126" y="86" width="288" height="368" fill="var(--line-confirmed)" opacity=".05"/>
+            <rect x="426" y="86" width="248" height="188" fill="var(--line-confirmed)" opacity=".05"/>
+            <rect x="426" y="286" width="248" height="168" fill="var(--line-pending)" opacity=".07"/>
+          </g>
+          <g class="layer-labels anim" font-family="var(--font-mono)" fill="var(--text)" opacity=".92">
+            <text x="270" y="272" text-anchor="middle" font-size="14" letter-spacing=".06em">LIVING</text>
+            <text x="270" y="290" text-anchor="middle" font-size="10" fill="var(--text-muted)">R-01 · CONFIRMED</text>
+            <text x="550" y="182" text-anchor="middle" font-size="14" letter-spacing=".06em">BED 01</text>
+            <text x="550" y="200" text-anchor="middle" font-size="10" fill="var(--text-muted)">R-02 · CONFIRMED</text>
+            <text x="550" y="372" text-anchor="middle" font-size="14" letter-spacing=".06em">BATH</text>
+            <text x="550" y="390" text-anchor="middle" font-size="10" fill="var(--line-pending)">R-03 · LIKELY</text>
+          </g>
+
+          <g class="layer-dims anim" stroke="var(--accent)" stroke-width="1" fill="none">
+            <path pathLength="1" d="M120,520 L680,520 M120,512 L120,528 M680,512 L680,528"/>
+            <path pathLength="1" d="M60,80 L60,460 M52,80 L68,80 M52,460 L68,460"/>
+          </g>
+          <g class="layer-dims anim" font-family="var(--font-mono)" font-size="12" fill="var(--accent)">
+            <text x="400" y="542" text-anchor="middle">5600</text>
+            <text x="34" y="274" text-anchor="middle" transform="rotate(-90 34 274)">3800</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="stage-bar">
+        <div class="stage-left">
+          <span class="stage-name" data-i18n="demo.stage">Stage — <b id="stageLabel">evidence captured</b></span>
+          <button id="soundToggle" class="sound-btn" type="button" aria-pressed="false">◌ sound</button>
+        </div>
+        <span class="stage-index" id="stageIndex">00 / 11</span>
+      </div>
+
+      <div class="legend">
+        <span><i class="swatch confirmed"></i>CONFIRMED</span>
+        <span><i class="swatch pending"></i>LIKELY</span>
+        <span><i class="swatch ambiguous"></i>AMBIGUOUS</span>
+      </div>
+    </div>
+
+    <div class="ledger">
+      <div class="ledger-head">
+        <h3 data-i18n="demo.ledger.title">Evidence ledger</h3>
+        <p data-i18n="demo.ledger.sub">What the reconstruction is deciding, as it decides it.</p>
+      </div>
+      <div class="ledger-feed" id="feed"></div>
+    </div>
+  </section>
+
+  <section class="pipeline">
+    <p class="kicker" data-i18n="pipeline.kicker">the pipeline</p>
+    <h2 data-i18n="pipeline.h2">اتناشر مرحلة، مفيهمش واحدة بتتخطى</h2>
+    <div class="steps" id="steps">
+      <div class="step"><span class="n">00</span><span class="t" data-i18n="steps.0">Raw evidence captured</span></div>
+      <div class="step"><span class="n">01</span><span class="t" data-i18n="steps.1">Coordinates + scale unified</span></div>
+      <div class="step"><span class="n">02</span><span class="t" data-i18n="steps.2">Vector + raster + OCR merged</span></div>
+      <div class="step"><span class="n">03</span><span class="t" data-i18n="steps.3">Ink separated by role</span></div>
+      <div class="step"><span class="n">04</span><span class="t" data-i18n="steps.4">Geometric network built</span></div>
+      <div class="step"><span class="n">05</span><span class="t" data-i18n="steps.5">Wall hypotheses</span></div>
+      <div class="step"><span class="n">06</span><span class="t" data-i18n="steps.6">Opening hypotheses</span></div>
+      <div class="step"><span class="n">07</span><span class="t" data-i18n="steps.7">Room hypotheses</span></div>
+      <div class="step"><span class="n">08</span><span class="t" data-i18n="steps.8">Global constraint composition</span></div>
+      <div class="step"><span class="n">09</span><span class="t" data-i18n="steps.9">Redraw vs. source</span></div>
+      <div class="step"><span class="n">10</span><span class="t" data-i18n="steps.10">Confidence decision</span></div>
+      <div class="step"><span class="n">11</span><span class="t" data-i18n="steps.11">Layered DXF + ledger</span></div>
+    </div>
+  </section>
+
+  <section class="story">
+    <p class="kicker" data-i18n="story.kicker">since 2024</p>
+    <h2 data-i18n="story.h2">حكاية مهندس واحد ضد رسمة بتكدب</h2>
+    <p class="subhead" data-i18n="story.sub">PSIE مش ناتج شركة. هي دستور اتكتب سطر سطر كل ما رسمة قالت حاجة والواقع قال حاجة تانية.</p>
+    <div class="log" id="storyLog"></div>
+  </section>
+
+  <section class="evidence">
+    <p class="kicker" data-i18n="ev.kicker">no claim without proof</p>
+    <h2 data-i18n="ev.h2">كل خط على الشاشة وراه رقم يقدر يتدافع عنه</h2>
+    <p class="subhead" data-i18n="ev.sub">مش وصف تسويقي — الأرقام دي نفسها اللي بتتكتب في الـledger فوق وإنت شغّال الديمو.</p>
+    <div class="cards" id="evCards"></div>
+  </section>
+
+  <section class="upload">
+    <p class="kicker" data-i18n="up.kicker">start from your own drawing</p>
+    <h2 data-i18n="up.h2">جرّب الرسمة بتاعتك</h2>
+    <p class="subhead" data-i18n="up.sub">ارفع DWG أو PDF أو DXF — هنقرأها في المتصفح بتاعك بس دلوقتي (اسم، حجم، امتداد)، من غير ما تتبعت لأي سيرفر.</p>
+    <div class="dropzone" id="dropzone" tabindex="0" role="button">
+      <div class="icon">⌁</div>
+      <div class="primary" data-i18n="up.drop.primary">اسحب الملف هنا أو دوس تختار</div>
+      <div class="secondary" data-i18n="up.drop.secondary">.dwg · .dxf · .pdf — حتى 50MB</div>
+      <input type="file" id="fileInput" accept=".dwg,.dxf,.pdf" multiple>
+    </div>
+    <div class="file-list" id="fileList"></div>
+    <p class="upload-note" data-i18n-html="up.note"><b>ملحوظة صادقة:</b> الرفع ده بيقرا اسم وحجم الملف بس محلياً في المتصفح. الخط اللي بيوصل الملف فعلياً لـpipeline التحليل (المراحل الاتناشر اللي فوق) لسه بيتبنى — مش هنقولك إنه شغال وهو مش شغال.</p>
+  </section>
+
+  <!-- =====================================================================
+       SANDBOX — the REAL QA-Check gate (product/qa_check/webapp/app.py).
+       Unlike the exploratory upload section above, this one is wired to a
+       genuine local backend: raw .dxf / extracted .json uploads run the
+       full harvest + report pipeline server-side and render the actual
+       numbers inside this page. It expects the local gate at the SAME
+       ORIGIN (127.0.0.1:8765) — see the honest note below for the
+       file:// case.
+
+       TODO(deploy): when this page is published, point SB_BASE at the
+       production gateway (env-driven) and keep the /upload-dxf,
+       /upload, /demo, /demo-structural routes contract-stable. The
+       fetches below already send Accept: application/json — the backend
+       renders the identical report as JSON for this page. Until then
+       SB_BASE stays same-origin so local runs work unchanged.
+       ===================================================================== -->
+  <section class="upload sandbox" id="sandbox">
+    <p class="kicker" data-i18n="sb.kicker">sandbox — the real gate</p>
+    <h2 data-i18n="sb.h2">جرّب المنصة — Sandbox</h2>
+    <p class="subhead" data-i18n="sb.sub">دي مش محاكاة: ارفع ملف DXF خام (أو JSON مستخرج) والبوابة تشغّل الحصاد والتدقيق فعلياً على جهازك وتعرض الأرقام الحقيقية هنا — عائلات، علاقات ربطية، وتنبيهات الامتناع الثلاثية.</p>
+    <div class="dropzone" id="sbDropzone" tabindex="0" role="button">
+      <div class="icon">⌁</div>
+      <div class="primary" data-i18n="sb.drop.primary">اسحب ملف DXF أو JSON هنا أو دوس تختار</div>
+      <div class="secondary" data-i18n="sb.drop.secondary">.dxf خام · .json مستخرج — حتى 512MB · DXF يُحصد داخل الخادم مباشرة</div>
+      <input type="file" id="sbFileInput" accept=".dxf,.json,application/json">
+    </div>
+    <div class="file-list" id="sbFileList"></div>
+    <div class="sandbox-actions">
+      <button type="button" class="sb-btn primary" id="sbAnalyze" disabled data-i18n="sb.analyze">تحليل الآن</button>
+      <button type="button" class="sb-btn" id="sbDemo" data-i18n="sb.demo1">⚡ ديمو معماري — THE HUB MALL</button>
+      <button type="button" class="sb-btn" id="sbDemoStruct" data-i18n="sb.demo2">⚡ ديمو إنشائي — SAFWA (LINKED)</button>
+    </div>
+    <div id="sbServerWarn"></div>
+    <div id="sbBusy">
+      <div class="t"><span class="sb-spin"></span><span data-i18n="sb.busy.t">جاري التحليل على الخادم المحلي… ده شغل حقيقي، مش أنيميشن.</span></div>
+      <div class="e" data-i18n="sb.busy.e">real compute in progress — expect ~20-35 s on large structural files</div>
+    </div>
+    <div id="sbResult"></div>
+    <p class="sb-note" data-i18n-html="sb.note"><b>ملحوظة صادقة:</b> الساند بوكس ده بيشتغل ضد البوابة المحلية على نفس الأصل (نفس الـorigin). لو فتحت الصفحة من <code>file://</code> مش هيلاقي الخادم — شغّل الخادم المحلي أولاً: <code>python product/qa_check/webapp/app.py</code> ثم افتح <code>http://localhost:8765</code>. دعم PDF قادم مع نواة المرحلة ب — مش هنوهمك بيه دلوقتي.</p>
+  </section>
+
+  <section class="register">
+    <p class="kicker" data-i18n="reg.kicker">reserve a seat</p>
+    <h2 data-i18n="reg.h2">احجز مكانك في أول دفعة</h2>
+    <p class="subhead" data-i18n="reg.sub">مفيش قائمة بريدية بتبيع بياناتك. الرسالة بتوصل لصندوق المهندس اللي بيبني PSIE بنفسه، مباشرة.</p>
+    <div class="register-grid">
+      <form class="register-form" id="regForm">
+        <div class="field">
+          <label for="regName" data-i18n="reg.name">الاسم</label>
+          <input type="text" id="regName" name="name" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="regEmail" data-i18n="reg.email">البريد الإلكتروني</label>
+          <input type="email" id="regEmail" name="email" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="regRole" data-i18n="reg.role">دورك</label>
+          <select id="regRole" name="role">
+            <option value="architect" data-i18n="reg.role.architect">مهندس معماري</option>
+            <option value="structural" data-i18n="reg.role.structural">مهندس إنشائي</option>
+            <option value="contractor" data-i18n="reg.role.contractor">مقاول / إدارة مشروع</option>
+            <option value="other" data-i18n="reg.role.other">حاجة تانية</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="regNote" data-i18n="reg.note">إيه اللي محتاج تحله</label>
+          <textarea id="regNote" name="note" placeholder=""></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="regSubmit" data-i18n="reg.submit">ابعت الطلب</button>
+        <p class="form-note" data-i18n="reg.formnote">دوسة الزرار بتفتح رسالة إيميل جاهزة على برنامج البريد بتاعك، معمولة من بياناتك فوق — إنت اللي بتبعتها بنفسك.</p>
+      </form>
+      <div class="register-side">
+        <div class="stat">
+          <span class="v mono">20</span>
+          <span class="l" data-i18n="reg.stat1">قاعدة حوكمة مكتوبة قبل أي سطر كود</span>
+        </div>
+        <div class="stat">
+          <span class="v mono">0</span>
+          <span class="l" data-i18n="reg.stat2">قرار اتاخد من غير دليل مكتوب جنبه</span>
+        </div>
+        <div class="stat">
+          <span class="v mono">2024</span>
+          <span class="l" data-i18n="reg.stat3">السنة اللي البرنامج ده اتولد فيها من مشكلة حقيقية</span>
+        </div>
+        <div class="confirm-box" id="confirmBox">
+          <span class="t" data-i18n="reg.confirm.t">تمام، الرسالة اتجهزت</span>
+          <span class="s" data-i18n="reg.confirm.s">لو برنامج البريد ماوصلش، ابعت مباشرة على البريد اللي هيظهر.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span data-i18n="footer.left">design exploration · registration opens your mail client, honestly</span>
+    <span>psie / drafting-table · v0.2</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  /* =====================================================================
+     i18n — every visible string lives here once, in both languages. The
+     toggle swaps textContent (or innerHTML for the two strong-tag ledes)
+     and flips <html lang>/[dir]. Technical tokens (W-07, 0.97, dates)
+     stay Latin/mono in both languages on purpose — they're identifiers,
+     not prose.
+     ===================================================================== */
+  var STORY = {
+    ar: [
+      {d:'2024', t:'الملف الأصلي اختفى، وأنا قاعد قدام سكانر', p:'المشروع كان جاهز يتحرك، والملف اللي كل حاجة فيه مبنية عليه ضاع. اللي فضل نسخة مطبوعة، ممسوحة ضوئياً، من غير طبقات ولا قياس متأكد منه. قعدت أسابيع أرجّع الرسمة بعيني وإيدي، وكل مرة أرجعلها أشك في خط كنت متأكد منه من قبل.', tag:null},
+      {d:'2024', t:'الشك مكنش المشكلة، عدم تسجيله كان المشكلة', p:'بعد أسابيع من الشغل ده فهمت حاجة: أنا مش بغلط أكتر من اللازم، أنا بس مش بسجل ليه أنا متأكد من خط ومش متأكد من التاني. كل حاجة كانت "شكلها صح" ومحدش، أنا نفسي، يقدر يقول ليه. من هنا جت القاعدة اللي فرّقت بين الدليل والتفسير والقرار — تلات حاجات، مش حاجة واحدة.', tag:'§3 EVIDENCE ≠ INTERPRETATION ≠ DECISION'},
+      {d:'2024', t:'لو مفيش أصل أرجعله، محدش يلمس اللي عندي', p:'أي نسخة ممسوحة أو مصوّرة بقت أقرب حاجة لأصل عندي، فمفروض محدش يعدّل فيها مباشرة. أي تصحيح لازم يحصل في نسخة تانية مربوطة بالأصل، عشان الطريق للمصدر ميضيعش مرة تانية.', tag:'§2 SOURCE AUTHORITY'},
+      {d:'2025', t:'الاختبار عدّى، والرسمة غلط', p:'أول نسخة أوتوماتيكية من الكود عدّت كل اختبار كتبته، وطلعت برسمة غلط هندسياً. ساعتها بقى عندي فئتين منفصلتين في دماغي: اختبار بيعدي، ودقة بتتحقق — ولا واحدة فيهم بتثبت التانية.', tag:'§12 EVIDENCE CLASSES'},
+      {d:'2025', t:'ماكنتش هبني كل حاجة ممكنة، بنيت اللي محتاجه بس', p:'كان سهل إني أضيف كل ميزة أفتكر إنها ممكن تلزم يوماً ما. اخترت عكس كده: مفيش بناء زيادة عن اللي الحالة الحالية محتاجاه فعلاً، وأي تعقيد جديد لازم يتبرر بفشل حصل بالفعل، مش باحتمال في دماغي.', tag:'§11 MINIMAL RECONSTRUCTION'},
+      {d:'2026', t:'20 قاعدة، مش قايمة مزايا', p:'بعد سنتين من الغلط والتصحيح، جمعت كل درس في دستور واحد. كل قاعدة فيها إجابة لمشكلة حصلت معايا فعلاً، مش افتراض كتبته على المكتب.', tag:'CONSTITUTION V10'}
+    ],
+    en: [
+      {d:'2024', t:'The original file was gone, and I was staring at a scanner', p:'The project was ready to move, and the file everything depended on had disappeared. What was left was a printed copy, scanned flat, with no layers and no confirmed measurements. I spent weeks rebuilding the drawing by eye, and kept second-guessing lines I\'d already confirmed once.', tag:null},
+      {d:'2024', t:'Doubt wasn\'t the problem. Not writing it down was.', p:'A few weeks in, I realized I wasn\'t getting more wrong than anyone would. I just had no record of why I trusted one line and doubted another. Everything "looked right," and nobody, me included, could say why. That\'s where the rule came from that keeps evidence, interpretation, and decision as three separate things instead of one blur.', tag:'§3 EVIDENCE ≠ INTERPRETATION ≠ DECISION'},
+      {d:'2024', t:'If there\'s no original to check against, nobody touches what you do have', p:'A scan or a print becomes the closest thing to a source I\'ve got, so it doesn\'t get edited directly. Every fix lives in a separate layer, tied back to what it changed, so the path to the original never disappears twice.', tag:'§2 SOURCE AUTHORITY'},
+      {d:'2025', t:'The tests passed. The drawing was still wrong.', p:'An early automated pass cleared every unit test I\'d written and still produced a geometrically wrong drawing. A passing test and an accurate drawing became two separate things in my head after that, and I stopped treating one as proof of the other.', tag:'§12 EVIDENCE CLASSES'},
+      {d:'2025', t:'I didn\'t build everything I could. I built what the case in front of me needed.', p:'It would have been easy to keep adding features I imagined might help someday. I did the opposite: nothing gets built beyond what the current case actually needs, and new complexity has to answer for a real failure, not a guess.', tag:'§11 MINIMAL RECONSTRUCTION'},
+      {d:'2026', t:'20 rules, not a feature list', p:'Two years of getting it wrong and correcting course turned into one constitution. Every rule answers something that actually happened to me, not a hypothetical written at a desk.', tag:'CONSTITUTION V10'}
+    ]
+  };
+
+  var EVIDENCE = {
+    ar:[
+      {c:'أبعاد الرسمة بترتبط بمقياس واحد متأكد منه من مصدرين مستقلين، مش افتراض.', p:'SCALE → 1:100 · confirmed by 2 independent dimension anchors', r:'§7 COORDINATE INTEGRITY'},
+      {c:'حيطة متتأكدش إلا لو ثلاث عائلات دليل مستقلة اتفقت عليها.', p:'WALL W-07 → CONFIRMED · 3 independent evidence families', r:'§12 EVIDENCE CLASSES'},
+      {c:'قفل غرفة متنازع عليه بيترفض تلقائي، وبيتسجل غموض — مش بننساه.', p:'ROOM R-03 enclosure → resolved by topology, residual 0.6%', r:'§9 AMBIGUITY IS NOT NOISE'},
+      {c:'أي قراءة نص OCR بتتوسم برقم ثقة حقيقي، مش "يمكن".', p:'DIMENSION 5600 → OCR confidence 0.97', r:'§5 EVIDENCE PROVENANCE'},
+      {c:'نفس المصدر + نفس السياسة = نفس المخرج، دايماً — من غير عشوائية بتغيّر النتيجة.', p:'run(N) == run(N+1) for identical (source, policy, version)', r:'§10 DETERMINISM'},
+      {c:'مفيش أكتر بناء من اللي الفرضية محتاجاه فعلاً — التعقيد مبيتحطش تحسباً.', p:'new complexity requires a measured failure, not a guess', r:'§11 MINIMAL RECONSTRUCTION'}
+    ],
+    en:[
+      {c:'Drawing scale is pinned to one confirmed value from two independent anchors — never assumed.', p:'SCALE → 1:100 · confirmed by 2 independent dimension anchors', r:'§7 COORDINATE INTEGRITY'},
+      {c:'A wall is never CONFIRMED unless three independent evidence families agree on it.', p:'WALL W-07 → CONFIRMED · 3 independent evidence families', r:'§12 EVIDENCE CLASSES'},
+      {c:'A disputed room closure fails closed automatically — ambiguity is preserved, never discarded.', p:'ROOM R-03 enclosure → resolved by topology, residual 0.6%', r:'§9 AMBIGUITY IS NOT NOISE'},
+      {c:'Every OCR read carries a real confidence figure, never a "probably".', p:'DIMENSION 5600 → OCR confidence 0.97', r:'§5 EVIDENCE PROVENANCE'},
+      {c:'Same source + same policy = same output, always — no randomness allowed to shift the result.', p:'run(N) == run(N+1) for identical (source, policy, version)', r:'§10 DETERMINISM'},
+      {c:'Nothing is built beyond what the current hypothesis actually needs — complexity is earned, not pre-built.', p:'new complexity requires a measured failure, not a guess', r:'§11 MINIMAL RECONSTRUCTION'}
+    ]
+  };
+
+  var I18N = {
+    ar: {
+      'brand.tag':'طاولة الرسم',
+      'hero.eyebrow':'دراسة تفاعل',
+      'hero.h1':'بتترسم قدام عينيك.',
+      'hero.lede':'البرنامج طالع من أزمة حقيقية: يوم ضاع فيه الـ<strong>source file</strong> الأصلي، وراحت معاه أيام — وأحياناً أسابيع — بتحاول ترجّع الرسمة من غير ما تلاقيها. PSIE <strong>مش بيدّعي</strong> إنه هيوصّلك للملف اللي ضاع، بس هيقرّب عليك المسافة ويقصّر عليك المشوار... كتير 🙂',
+      'demo.stage':'المرحلة — ',
+      'demo.ledger.title':'دفتر الأدلة',
+      'demo.ledger.sub':'اللي إعادة البناء بتقرره، لحظة ما بيقرره.',
+      'pipeline.kicker':'الأنابيب',
+      'pipeline.h2':'اتناشر مرحلة، مفيهمش واحدة بتتخطى',
+      'steps.0':'التقاط الدليل الخام','steps.1':'توحيد الإحداثيات والمقياس','steps.2':'دمج المتجه + الراستر + OCR','steps.3':'فصل الخطوط حسب دورها','steps.4':'بناء الشبكة الهندسية','steps.5':'فرضيات الحوائط','steps.6':'فرضيات الفتحات','steps.7':'فرضيات الغرف','steps.8':'تركيب القيود الشاملة','steps.9':'إعادة رسم مقابل المصدر','steps.10':'قرار الثقة','steps.11':'DXF متعدد الطبقات + السجل',
+      'story.kicker':'من سنة 2024',
+      'story.h2':'حكاية مهندس واحد ضد رسمة بتكدب',
+      'story.sub':'مش قايمة مزايا اتكتبت في اجتماع. القواعد العشرين دي طلعت من مرة واحدة ضاع فيها الملف الأصلي، وقعدت أسابيع أبنيه من الصفر.',
+      'ev.kicker':'مفيش ادّعاء من غير دليل',
+      'ev.h2':'كل خط على الشاشة وراه رقم يقدر يتدافع عنه',
+      'ev.sub':'مش وصف تسويقي — الأرقام دي نفسها اللي بتتكتب في دفتر الأدلة فوق وإنت شغّال الديمو.',
+      'up.kicker':'ابدأ من رسمتك',
+      'up.h2':'جرّب الرسمة بتاعتك',
+      'up.sub':'ارفع DWG أو PDF أو DXF — هنقرأها في المتصفح بتاعك بس دلوقتي (اسم، حجم، امتداد)، من غير ما تتبعت لأي سيرفر.',
+      'up.drop.primary':'اسحب الملف هنا أو دوس تختار',
+      'up.drop.secondary':'.dwg · .dxf · .pdf — حتى 50MB',
+      'up.note':'<b>ملحوظة صادقة:</b> الرفع ده بيقرا اسم وحجم الملف بس محلياً في المتصفح. الخط اللي بيوصل الملف فعلياً لـpipeline التحليل (المراحل الاتناشر اللي فوق) لسه بيتبنى — مش هنقولك إنه شغال وهو مش شغال.',
+      'sb.kicker':'الساند بوكس — البوابة الحقيقية',
+      'sb.h2':'جرّب المنصة — Sandbox',
+      'sb.sub':'دي مش محاكاة: ارفع ملف DXF خام (أو JSON مستخرج) والبوابة تشغّل الحصاد والتدقيق فعلياً على جهازك وتعرض الأرقام الحقيقية هنا — عائلات، علاقات ربطية، وتنبيهات الامتناع.',
+      'sb.drop.primary':'اسحب ملف DXF أو JSON هنا أو دوس تختار',
+      'sb.drop.secondary':'.dxf خام · .json مستخرج — حتى 512MB · الـDXF يُحصد داخل الخادم مباشرة',
+      'sb.analyze':'تحليل الآن',
+      'sb.demo1':'⚡ ديمو معماري — THE HUB MALL',
+      'sb.demo2':'⚡ ديمو إنشائي — SAFWA (LINKED)',
+      'sb.busy.t':'جاري التحليل على الخادم المحلي… ده شغل حقيقي، مش أنيميشن.',
+      'sb.busy.e':'الشغل الفعلي شغال — توقع ~20-35 ثانية على الملفات الإنشائية الكبيرة',
+      'sb.note':'<b>ملحوظة صادقة:</b> الساند بوكس ده بيشتغل ضد البوابة المحلية على نفس الأصل. لو فتحت الصفحة من <code>file://</code> مش هيلاقي الخادم — شغّل الخادم المحلي أولاً: <code>python product/qa_check/webapp/app.py</code> ثم افتح <code>http://localhost:8765</code>. دعم PDF قادم مع نواة المرحلة ب — مش هنوهمك بيه دلوقتي.',
+      'sb.warn.offline':'الخادم المحلي مش شغال (أو الصفحة متفتحتش من الخادم). شغّل <code>python product/qa_check/webapp/app.py</code> أولاً ثم حدّث الصفحة — من غيره مفيز تحليل حقيقي، ومش هنعرض أرقام مخترعة.',
+      'sb.warn.file':'الصفحة متفتوحة من <code>file://</code> — المتصفح مش هيسمح بالنداء على الخادم المحلي. شغّل الخادم وافتح الصفحة من <code>http://localhost:8765</code>.',
+      'sb.report.title':'تقرير فحص الجودة',
+      'sb.report.fam':'تغطية العائلات',
+      'sb.report.rel':'العلاقات الربطية',
+      'sb.report.conf':'تعارضات محتملة',
+      'sb.report.sum':'الملخص التنفيذي',
+      'sb.report.file':'الملف',
+      'sb.report.status':'الحالة',
+      'sb.report.gen':'وقت التوليد',
+      'sb.report.fams':'العائلات',
+      'sb.report.confs':'التعارضات',
+      'sb.report.layers':'طبقات',
+      'sb.report.confirmed':'مؤكد',
+      'sb.report.abstain':'ممتنع',
+      'sb.report.skip':'مستبعد',
+      'sb.report.cov':'تغطية',
+      'sb.report.relation':'العلاقة',
+      'sb.report.state':'الحالة',
+      'sb.report.anchored':'مرتكز',
+      'sb.report.ratio':'النسبة',
+      'sb.report.reason':'السبب',
+      'sb.report.none':'لا توجد',
+      'sb.report.norel':'لا توجد علاقات مقاسة',
+      'sb.report.noratio':'— لا تُعرض نسبة — لا يوجد تقييم موثوق',
+      'sb.report.missing':'عائلة مفقودة',
+      'sb.report.fromdxf':'ملف DXF خام — حصاد داخلي',
+      'sb.report.fromjson':'ملف JSON مستخرج',
+      'sb.report.demo1':'ملف تجريبي — THE HUB MALL (معماري)',
+      'sb.report.demo2':'ملف تجريبي — SAFWA COLUMNS (إنشائي)',
+      'reg.kicker':'احجز مكانك',
+      'reg.h2':'احجز مكانك في أول دفعة',
+      'reg.sub':'مفيش قائمة بريدية بتبيع بياناتك. الرسالة بتوصل لصندوق المهندس اللي بيبني PSIE بنفسه، مباشرة.',
+      'reg.name':'الاسم','reg.email':'البريد الإلكتروني','reg.role':'دورك',
+      'reg.role.architect':'مهندس معماري','reg.role.structural':'مهندس إنشائي','reg.role.contractor':'مقاول / إدارة مشروع','reg.role.other':'حاجة تانية',
+      'reg.note':'إيه اللي محتاج تحله',
+      'reg.submit':'ابعت الطلب',
+      'reg.formnote':'دوسة الزرار بتفتح رسالة إيميل جاهزة على برنامج البريد بتاعك، معمولة من بياناتك فوق — إنت اللي بتبعتها بنفسك.',
+      'reg.stat1':'قاعدة حوكمة مكتوبة قبل أي سطر كود',
+      'reg.stat2':'قرار اتاخد من غير دليل مكتوب جنبه',
+      'reg.stat3':'السنة اللي البرنامج ده اتولد فيها من مشكلة حقيقية',
+      'reg.confirm.t':'تمام، الرسالة اتجهزت',
+      'reg.confirm.s':'لو برنامج البريد ماوصلش، ابعت مباشرة على البريد اللي هيظهر.',
+      'footer.left':'استكشاف تصميمي · التسجيل بيفتح برنامج البريد بتاعك، بصراحة'
+    },
+    en: {
+      'brand.tag':'drafting table',
+      'hero.eyebrow':'interaction study',
+      'hero.h1':'Watch it draw itself.',
+      'hero.lede':'PSIE was born out of a real crisis — the day the original <strong>source file</strong> vanished, and days, sometimes weeks, went into redrawing it from nothing. PSIE <strong>doesn\'t claim</strong> it can bring back the file you lost. But it closes most of that distance for you — a lot of it 🙂',
+      'demo.stage':'Stage — ',
+      'demo.ledger.title':'Evidence ledger',
+      'demo.ledger.sub':'What the reconstruction is deciding, as it decides it.',
+      'pipeline.kicker':'the pipeline',
+      'pipeline.h2':'Twelve stages, none of them skipped',
+      'steps.0':'Raw evidence captured','steps.1':'Coordinates + scale unified','steps.2':'Vector + raster + OCR merged','steps.3':'Ink separated by role','steps.4':'Geometric network built','steps.5':'Wall hypotheses','steps.6':'Opening hypotheses','steps.7':'Room hypotheses','steps.8':'Global constraint composition','steps.9':'Redraw vs. source','steps.10':'Confidence decision','steps.11':'Layered DXF + ledger',
+      'story.kicker':'since 2024',
+      'story.h2':'One engineer against a drawing that lies',
+      'story.sub':'Not a feature list from a meeting. These twenty rules came out of one specific time the original file disappeared, and I spent weeks rebuilding it from nothing.',
+      'ev.kicker':'no claim without proof',
+      'ev.h2':'Every line on screen has a number behind it that can defend itself',
+      'ev.sub':'Not marketing copy — these are the same figures the evidence ledger above writes while the demo runs.',
+      'up.kicker':'start from your own drawing',
+      'up.h2':'Try your own drawing',
+      'up.sub':'Upload a DWG, PDF or DXF — right now we only read it in your browser (name, size, extension), nothing sent to any server.',
+      'up.drop.primary':'Drag a file here, or click to choose',
+      'up.drop.secondary':'.dwg · .dxf · .pdf — up to 50MB',
+      'up.note':'<b>Honest note:</b> this upload reads only the file\'s name and size, locally, in your browser. The wire that actually connects a file to the twelve-stage pipeline above is still being built — we won\'t tell you it works when it doesn\'t.',
+      'sb.kicker':'sandbox — the real gate',
+      'sb.h2':'Try the platform — Sandbox',
+      'sb.sub':'This is not a mock: upload a raw .dxf (or an extracted .json) and the gate runs the harvest and audit for real on your machine, rendering the actual numbers here — families, cross-family relations, and abstention alerts.',
+      'sb.drop.primary':'Drag a DXF or JSON file here, or click to choose',
+      'sb.drop.secondary':'raw .dxf · extracted .json — up to 512MB · DXF is harvested server-side',
+      'sb.analyze':'Analyze now',
+      'sb.demo1':'⚡ Architectural demo — THE HUB MALL',
+      'sb.demo2':'⚡ Structural demo — SAFWA (LINKED)',
+      'sb.busy.t':'Analyzing on the local server… this is real compute, not animation.',
+      'sb.busy.e':'real compute in progress — expect ~20-35 s on large structural files',
+      'sb.note':'<b>Honest note:</b> this sandbox talks to the local gate on the same origin. If you opened the page via <code>file://</code> it won\'t find the server — start the local server first: <code>python product/qa_check/webapp/app.py</code>, then open <code>http://localhost:8765</code>. PDF support arrives with the Phase B nucleus — we won\'t promise it today.',
+      'sb.warn.offline':'The local server is not running (or the page wasn\'t opened from it). Start <code>python product/qa_check/webapp/app.py</code> first, then reload — without it there is no real analysis, and we won\'t display invented numbers.',
+      'sb.warn.file':'This page was opened via <code>file://</code> — the browser won\'t allow calls to the local server. Start the server and open the page from <code>http://localhost:8765</code>.',
+      'sb.report.title':'QA-Check Report',
+      'sb.report.fam':'Family Coverage',
+      'sb.report.rel':'Cross-family Relations',
+      'sb.report.conf':'Potential Conflicts',
+      'sb.report.sum':'Executive Summary',
+      'sb.report.file':'File',
+      'sb.report.status':'Status',
+      'sb.report.gen':'Generated',
+      'sb.report.fams':'Families',
+      'sb.report.confs':'Conflicts',
+      'sb.report.layers':'Layers',
+      'sb.report.confirmed':'Confirmed',
+      'sb.report.abstain':'Abstain',
+      'sb.report.skip':'Skip',
+      'sb.report.cov':'Coverage',
+      'sb.report.relation':'Relation',
+      'sb.report.state':'Status',
+      'sb.report.anchored':'Anchored',
+      'sb.report.ratio':'Ratio',
+      'sb.report.reason':'Reason',
+      'sb.report.none':'none',
+      'sb.report.norel':'no measured relations',
+      'sb.report.noratio':'— no ratio shown — no trusted evaluation',
+      'sb.report.missing':'missing family',
+      'sb.report.fromdxf':'raw DXF file — server-side harvest',
+      'sb.report.fromjson':'extracted JSON file',
+      'sb.report.demo1':'demo file — THE HUB MALL (architectural)',
+      'sb.report.demo2':'demo file — SAFWA COLUMNS (structural)',
+      'reg.kicker':'reserve a seat',
+      'reg.h2':'Reserve a seat in the first batch',
+      'reg.sub':'No mailing list selling your data. The message goes straight to the inbox of the engineer building PSIE, directly.',
+      'reg.name':'Name','reg.email':'Email','reg.role':'Your role',
+      'reg.role.architect':'Architect','reg.role.structural':'Structural engineer','reg.role.contractor':'Contractor / PM','reg.role.other':'Something else',
+      'reg.note':'What you need solved',
+      'reg.submit':'Send request',
+      'reg.formnote':'This button opens a ready-made email in your own mail client, built from what you typed above — you send it yourself.',
+      'reg.stat1':'governance rules written before a single line of code',
+      'reg.stat2':'decisions made without a written evidence trail',
+      'reg.stat3':'the year this started from a real problem',
+      'reg.confirm.t':'Done — the message is ready',
+      'reg.confirm.s':'If your mail client didn\'t open, write directly to the address shown.',
+      'footer.left':'design exploration · registration honestly just opens your mail client'
+    }
+  };
+
+  var CONTACT_EMAIL = 'zeethar2000@gmail.com';
+
+  function renderStory(lang){
+    var wrap = document.getElementById('storyLog');
+    wrap.innerHTML = '';
+    STORY[lang].forEach(function(e){
+      var row = document.createElement('div');
+      row.className = 'log-entry';
+      row.innerHTML =
+        '<div class="log-date">' + e.d + '</div>' +
+        '<div class="log-body"><h4>' + e.t + '</h4><p>' + e.p + '</p>' +
+        (e.tag ? '<span class="log-tag">' + e.tag + '</span>' : '') + '</div>';
+      wrap.appendChild(row);
+    });
+  }
+
+  function renderEvidence(lang){
+    var wrap = document.getElementById('evCards');
+    wrap.innerHTML = '';
+    EVIDENCE[lang].forEach(function(e){
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        '<div class="claim">' + e.c + '</div>' +
+        '<div class="proof">' + e.p + '</div>' +
+        '<div class="rule">' + e.r + '</div>';
+      wrap.appendChild(card);
+    });
+  }
+
+  function applyI18n(lang){
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    var dict = I18N[lang];
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var key = el.getAttribute('data-i18n');
+      if(dict[key] !== undefined){
+        // preserve nested elements like <b id="stageLabel"> inside stage-name
+        if(el.children.length){
+          var firstText = el.childNodes[0];
+          if(firstText && firstText.nodeType === 3){ firstText.textContent = dict[key]; }
+        } else {
+          el.textContent = dict[key];
+        }
+      }
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+      var key = el.getAttribute('data-i18n-html');
+      if(dict[key] !== undefined) el.innerHTML = dict[key];
+    });
+    document.querySelectorAll('.lang-toggle button').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === lang));
+    });
+    renderStory(lang);
+    renderEvidence(lang);
+  }
+
+  document.querySelectorAll('.lang-toggle button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var lang = b.getAttribute('data-lang');
+      try{ localStorage.setItem('psie-lang', lang); }catch(e){}
+      applyI18n(lang);
+    });
+  });
+
+  var savedLang = 'ar';
+  try{ savedLang = localStorage.getItem('psie-lang') || 'ar'; }catch(e){}
+  applyI18n(savedLang);
+
+  /* ---------------------------------------------------------------------
+     upload — real client-side file read (name/size/type only), honestly
+     not wired to any backend. No fetch, no XHR: nothing leaves the tab.
+     --------------------------------------------------------------------- */
+  var dropzone = document.getElementById('dropzone');
+  var fileInput = document.getElementById('fileInput');
+  var fileList = document.getElementById('fileList');
+  var files = [];
+
+  function fmtSize(bytes){
+    if(bytes < 1024) return bytes + ' B';
+    if(bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/(1024*1024)).toFixed(1) + ' MB';
+  }
+
+  function renderFiles(){
+    fileList.innerHTML = '';
+    files.forEach(function(f, i){
+      var row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML =
+        '<span class="name">' + f.name + '</span>' +
+        '<span class="size">' + fmtSize(f.size) + '</span>' +
+        '<button type="button" class="remove" aria-label="remove">×</button>';
+      row.querySelector('.remove').addEventListener('click', function(){
+        files.splice(i, 1);
+        renderFiles();
+      });
+      fileList.appendChild(row);
+    });
+  }
+
+  function addFiles(list){
+    Array.prototype.forEach.call(list, function(f){ files.push(f); });
+    renderFiles();
+  }
+
+  dropzone.addEventListener('click', function(){ fileInput.click(); });
+  dropzone.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ fileInput.click(); } });
+  fileInput.addEventListener('change', function(){ addFiles(fileInput.files); fileInput.value = ''; });
+  ['dragenter','dragover'].forEach(function(ev){
+    dropzone.addEventListener(ev, function(e){ e.preventDefault(); dropzone.classList.add('drag'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    dropzone.addEventListener(ev, function(e){ e.preventDefault(); dropzone.classList.remove('drag'); });
+  });
+  dropzone.addEventListener('drop', function(e){
+    if(e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+  });
+
+  /* ---------------------------------------------------------------------
+     registration — genuinely functional, zero backend: builds a mailto:
+     link from the form fields and opens it. No fabricated "sent!" state
+     with nothing behind it — the confirm box is honest about what
+     actually happened (a mail client opened; the visitor sends it).
+     --------------------------------------------------------------------- */
+  var regForm = document.getElementById('regForm');
+  var confirmBox = document.getElementById('confirmBox');
+
+  regForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = document.getElementById('regName').value.trim();
+    var email = document.getElementById('regEmail').value.trim();
+    var role = document.getElementById('regRole').value;
+    var note = document.getElementById('regNote').value.trim();
+    var subject = 'PSIE — reserve a seat: ' + name;
+    var body =
+      'Name: ' + name + '\n' +
+      'Email: ' + email + '\n' +
+      'Role: ' + role + '\n' +
+      'Note: ' + (note || '—');
+    var href = 'mailto:' + CONTACT_EMAIL +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body);
+    window.location.href = href;
+    confirmBox.classList.add('show');
+    document.querySelector('.confirm-box .s').textContent =
+      (document.documentElement.lang === 'ar'
+        ? 'لو برنامج البريد ماوصلش، ابعت مباشرة على: '
+        : 'If your mail client didn\'t open, write directly to: ') + CONTACT_EMAIL;
+  });
+
+  /* =====================================================================
+     SANDBOX — the real QA-Check gate. Same-origin fetch to the local
+     backend (product/qa_check/webapp/app.py). All report numbers are
+     rendered verbatim from the server's JSON — this page recomputes
+     NOTHING. Honesty rules:
+       - file:// or server-down -> a plain "start the local server" note,
+         never invented numbers;
+       - PDF/DWG -> the server's honest rejection message verbatim;
+       - empty states -> the three-way banner (DECLARED_FAILURE /
+         EMPTY_MODEL_SPACE / NO_RECOGNIZED_FAMILIES) exactly as the
+         report generator measured them.
+     TODO(deploy): see the comment block above the #sandbox section —
+     point SB_BASE at the production gateway when publishing.
+     ===================================================================== */
+  var SB_BASE = '';  /* same origin; set to gateway URL at deploy time */
+  var sbDrop = document.getElementById('sbDropzone');
+  var sbInput = document.getElementById('sbFileInput');
+  var sbList = document.getElementById('sbFileList');
+  var sbAnalyze = document.getElementById('sbAnalyze');
+  var sbBusy = document.getElementById('sbBusy');
+  var sbResult = document.getElementById('sbResult');
+  var sbWarn = document.getElementById('sbServerWarn');
+  var sbFile = null;
+
+  function sbT(key, fallback){
+    var lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+    try{ return (I18N[lang][key] !== undefined ? I18N[lang][key] : fallback); }
+    catch(e){ return fallback; }
+  }
+  function sbEsc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function sbLang(){ return document.documentElement.lang === 'ar' ? 'ar' : 'en'; }
+
+  function sbSetWarn(html){
+    if(html){ sbWarn.innerHTML = html; sbWarn.style.display = 'block'; }
+    else { sbWarn.style.display = 'none'; sbWarn.innerHTML = ''; }
+  }
+
+  /* honest connectivity check on load: file:// and dead-server states
+     get the real note, not a silent broken button */
+  function sbCheckServer(){
+    if(location.protocol === 'file:'){
+      sbSetWarn('<b>' + sbT('sb.warn.file', 'file://') + '</b>');
+      sbAnalyze.disabled = true; sbAnalyze.title = 'server';
+      return;
+    }
+    fetch(SB_BASE + '/health').then(function(r){ if(!r.ok) throw 0; sbSetWarn(''); })
+      .catch(function(){
+        sbSetWarn('<b>' + sbT('sb.warn.offline', 'offline') + '</b>');
+        sbAnalyze.disabled = true; sbAnalyze.title = 'server';
+      });
+  }
+  sbCheckServer();
+
+  function sbSetFile(f){
+    sbFile = f;
+    sbList.innerHTML = '';
+    if(!f){ sbAnalyze.disabled = true; return; }
+    var row = document.createElement('div');
+    row.className = 'file-row';
+    row.innerHTML = '<span class="name">' + sbEsc(f.name) + '</span>' +
+      '<span class="size">' + fmtSize(f.size) + '</span>' +
+      '<button type="button" class="remove" title="×">✕</button>';
+    row.querySelector('.remove').addEventListener('click', function(){
+      sbSetFile(null);
+    });
+    sbList.appendChild(row);
+    sbAnalyze.disabled = location.protocol === 'file:';
+  }
+  sbDrop.addEventListener('click', function(){ sbInput.click(); });
+  sbDrop.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); sbInput.click(); }
+  });
+  sbInput.addEventListener('change', function(){
+    if(sbInput.files.length) sbSetFile(sbInput.files[0]);
+    sbInput.value = '';
+  });
+  ['dragenter','dragover'].forEach(function(ev){
+    sbDrop.addEventListener(ev, function(e){ e.preventDefault(); sbDrop.classList.add('drag'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    sbDrop.addEventListener(ev, function(e){ e.preventDefault(); sbDrop.classList.remove('drag'); });
+  });
+  sbDrop.addEventListener('drop', function(e){
+    if(e.dataTransfer && e.dataTransfer.files.length) sbSetFile(e.dataTransfer.files[0]);
+  });
+
+  function sbBusyShow(on){ sbBusy.style.display = on ? 'block' : 'none'; }
+
+  function sbBanner(report){
+    if(report.empty_reason === 'DECLARED_FAILURE'){
+      return '<div class="sb-banner"><b>⚠ ' + sbT('sb.report.title','') + ' — DECLARED_FAILURE:</b> ' +
+        sbEsc(report.extraction_error || 'n/a') + '</div>';
+    }
+    if(report.empty_alert){
+      return '<div class="sb-banner"><b>⚠ ' + sbEsc(report.empty_alert.ar) + '</b><br>' +
+        sbEsc(report.empty_alert.en) + '</div>';
+    }
+    return '';
+  }
+
+  function sbRenderReport(report, sourceLabel){
+    var ar = sbLang() === 'ar';
+    var h = '<div class="sb-report">';
+    h += '<div class="sb-meta"><b>' + sbEsc(report.file) + '</b><br>' +
+      sbEsc(sourceLabel) + '<br>' +
+      'status: <b>' + sbEsc(report.status) + '</b> · generated: ' +
+      sbEsc(report.generated_at) + ' · families: <b>' + (report.families ? report.families.length : 0) +
+      '</b> · conflicts: ' + (report.potential_conflicts ? report.potential_conflicts.length : 0) + '</div>';
+    h += sbBanner(report);
+    /* executive summary — verbatim lines */
+    if(report.executive_summary && report.executive_summary.length){
+      h += '<div><h3 class="sb-sub">' + sbEsc(ar ? 'الملخص التنفيذي' : 'Executive Summary') + '</h3>';
+      report.executive_summary.forEach(function(line){
+        h += '<div class="sb-summary">' + sbEsc(line) + '</div>';
+      });
+      h += '</div>';
+    }
+    /* family coverage */
+    h += '<div><h3 class="sb-sub">' + sbEsc(ar ? 'تغطية العائلات' : 'Family Coverage') + '</h3>';
+    if(report.families && report.families.length){
+      h += '<table class="sb-table"><tr><th>' + sbEsc(ar ? 'العائلة' : 'Family') +
+        '</th><th>' + sbEsc(ar ? 'طبقات' : 'Layers') + '</th><th>' + sbEsc(ar ? 'مؤكد' : 'Confirmed') +
+        '</th><th>' + sbEsc(ar ? 'ممتنع' : 'Abstain') + '</th><th>' + sbEsc(ar ? 'مستبعد' : 'Skip') +
+        '</th><th>' + sbEsc(ar ? 'تغطية' : 'Coverage') + '</th></tr>';
+      report.families.forEach(function(r){
+        h += '<tr' + (r.needs_engineer_review ? ' class="flag"' : '') + '><td>' +
+          sbEsc(r.family) + (r.needs_engineer_review ? ' ⚠' : '') + '</td>' +
+          '<td class="num">' + r.layer_count + '</td>' +
+          '<td class="num sb-ok">' + r.confirmed + '</td>' +
+          '<td class="num sb-warn">' + r.abstain + '</td>' +
+          '<td class="num">' + r.skip + '</td>' +
+          '<td class="num">' + (r.coverage_pct === null || r.coverage_pct === undefined ? '—' : r.coverage_pct + '%') + '</td></tr>';
+      });
+      h += '</table>';
+    } else {
+      h += '<span class="sb-empty">' + sbEsc(ar ? 'لا توجد عائلات' : 'no families') + '</span>';
+    }
+    h += '</div>';
+    /* cross-family relations — verbatim statuses, no recomputation */
+    h += '<div><h3 class="sb-sub">' + sbEsc(ar ? 'العلاقات الربطية' : 'Cross-family Relations') + '</h3>';
+    if(report.cross_family_relations && report.cross_family_relations.length){
+      h += '<table class="sb-table"><tr><th>' + sbEsc(ar ? 'العلاقة' : 'Relation') +
+        '</th><th>' + sbEsc(ar ? 'الحالة' : 'Status') + '</th><th>' + sbEsc(ar ? 'مرتكز' : 'Anchored') +
+        '</th><th>' + sbEsc(ar ? 'النسبة' : 'Ratio') + '</th><th>' + sbEsc(ar ? 'السبب' : 'Reason') + '</th></tr>';
+      report.cross_family_relations.forEach(function(rel){
+        var st = sbEsc(rel.status || '?');
+        var stHtml = rel.status === 'LINKED' ? '<span class="sb-ok">' + st + '</span>' : '<span class="sb-warn">' + st + '</span>';
+        var anch = '—', ratio = '—', reason = '—';
+        if(rel.status === 'LINKED'){
+          anch = (rel.anchored || 0) + '/' + (rel.n_beam_endpoints || 0);
+          ratio = (rel.anchored_ratio_pct === null || rel.anchored_ratio_pct === undefined) ? '—' : rel.anchored_ratio_pct + '%';
+        } else if(rel.status === 'NOT_EVALUABLE_MISSING_FAMILY'){
+          reason = sbEsc(ar ? 'عائلة مفقودة' : 'missing family') + ': ' +
+            sbEsc((rel.missing_families || []).join(', '));
+        } else {
+          anch = (rel.anchored || 0) + '/' + (rel.n_beam_endpoints || 0);
+          ratio = sbEsc(ar ? '— لا تُعرض نسبة — لا يوجد تقييم موثوق' : '— no ratio shown — no trusted evaluation');
+          reason = sbEsc(rel.reason || '—');
+        }
+        h += '<tr><td>' + sbEsc(rel.relation || '?') + '</td><td class="num">' + stHtml +
+          '</td><td class="num">' + anch + '</td><td class="num">' + ratio +
+          '</td><td>' + reason + '</td></tr>';
+      });
+      h += '</table>';
+    } else {
+      h += '<span class="sb-empty">' + sbEsc(ar ? 'لا توجد علاقات مقاسة' : 'no measured relations') + '</span>';
+    }
+    h += '</div></div>';
+    sbResult.innerHTML = h;
+  }
+
+  function sbRenderError(message){
+    sbResult.innerHTML = '<div class="sb-banner error">' + sbEsc(message) + '</div>';
+  }
+
+  function sbRun(url, body, sourceLabel){
+    sbResult.innerHTML = '';
+    sbBusyShow(true);
+    var t0 = Date.now();
+    fetch(url, body).then(function(r){ return r.json(); }).then(function(j){
+      sbBusyShow(false);
+      if(j && (j.status === 'ERROR' || j.status === 'UNSUPPORTED_FORMAT')){
+        sbRenderError(j.message || (typeof j === 'string' ? j : JSON.stringify(j)));
+        return;
+      }
+      if(!j || !j.file){ sbRenderError(String(j)); return; }
+      sbRenderReport(j, sourceLabel);
+    }).catch(function(e){
+      sbBusyShow(false);
+      sbRenderError((sbLang() === 'ar' ? 'خطأ شبكة / network error: ' : 'network error: ') + e);
+    });
+  }
+
+  sbAnalyze.addEventListener('click', function(){
+    if(!sbFile) return;
+    var fd = new FormData();
+    fd.append('file', sbFile);
+    var name = (sbFile.name || '').toLowerCase();
+    var isDxf = name.endsWith('.dxf');
+    var isJson = name.endsWith('.json');
+    var ar = sbLang() === 'ar';
+    var label = isDxf
+      ? (ar ? 'ملف DXF خام — حصاد داخلي' : 'raw DXF file — server-side harvest')
+      : (ar ? 'ملف JSON مستخرج' : 'extracted JSON file');
+    if(!isDxf && !isJson){
+      /* honest client-side pre-rejection, mirrors the server message */
+      sbRenderError(ar
+        ? 'الامتداد ده غير مدعوم — دعم PDF قادم مع النواة (المرحلة ب) — حالياً ارفع DXF أو JSON'
+        : 'This extension is not supported — PDF support arrives with the Phase B nucleus — for now upload DXF or JSON');
+      return;
+    }
+    sbRun(isDxf ? '/upload-dxf' : '/upload',
+      { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } },
+      label);
+  });
+  document.getElementById('sbDemo').addEventListener('click', function(){
+    var ar = sbLang() === 'ar';
+    sbRun('/demo', { method: 'GET', headers: { 'Accept': 'application/json' } },
+      ar ? 'ملف تجريبي — THE HUB MALL (معماري)' : 'demo file — THE HUB MALL (architectural)');
+  });
+  document.getElementById('sbDemoStruct').addEventListener('click', function(){
+    var ar = sbLang() === 'ar';
+    sbRun('/demo-structural', { method: 'GET', headers: { 'Accept': 'application/json' } },
+      ar ? 'ملف تجريبي — SAFWA COLUMNS (إنشائي)' : 'demo file — SAFWA COLUMNS (structural)');
+  });
+
+  /* =====================================================================
+     demo engine — unchanged from the verified build (timing + sound
+     confirmed independently: ~46.6s full loop, zero runtime errors)
+     ===================================================================== */
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var svgStyle = document.createElement('style');
+  svgStyle.textContent =
+    '.layer-walls path,.layer-openings path,.layer-dims path{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.1s cubic-bezier(.2,.7,.2,1);}' +
+    '.layer-grid path{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1s ease;}' +
+    '.layer-rooms,.layer-labels,.layer-grid circle,.layer-grid text,.layer-dims text{opacity:0;transition:opacity .7s ease;}' +
+    '.reveal{stroke-dashoffset:0 !important;}' +
+    '.show{opacity:1 !important;}';
+  document.head.appendChild(svgStyle);
+
+  var stages = [
+    {label:'evidence captured', ms:2600, reveal:['grid-lines'], entries:[
+      ['CONFIRMED','SOURCE SCAN → <b>page 1, 300dpi</b> · content hash matched']
+    ]},
+    {label:'coordinates unified', ms:2200, reveal:[], entries:[
+      ['CONFIRMED','SCALE → <b>1:100</b> · verified by 2 independent dimension anchors']
+    ]},
+    {label:'vector + raster + OCR merged', ms:3400, reveal:['grid-marks'], entries:[
+      ['CONFIRMED','GRID AXIS B → verified · usage 94%']
+    ]},
+    {label:'ink separated', ms:2800, reveal:[], entries:[
+      ['LIKELY','SEGMENT S-114 → dimension-line candidate, awaiting text anchor']
+    ]},
+    {label:'wall network', ms:4200, reveal:['walls'], entries:[
+      ['CONFIRMED','WALL W-07 → CONFIRMED · 3 independent evidence families'],
+      ['CONFIRMED','WALL W-11 → CONFIRMED · parallel-pair + raster support']
+    ]},
+    {label:'wall hypotheses', ms:2600, reveal:[], entries:[
+      ['CONFIRMED','WALL THICKNESS → 200mm · consensus across 4 segments']
+    ]},
+    {label:'openings', ms:3200, reveal:['openings'], entries:[
+      ['CONFIRMED','OPENING O-01 (door, entry) → CONFIRMED · swing arc matched'],
+      ['LIKELY','OPENING O-03 (door, 900mm) → LIKELY · awaiting secondary evidence']
+    ]},
+    {label:'room hypotheses', ms:3800, reveal:['rooms'], entries:[
+      ['AMBIGUOUS','ROOM R-03 enclosure → AMBIGUOUS · competing closure']
+    ]},
+    {label:'global composition', ms:5200, reveal:[], entries:[
+      ['CONFIRMED','ROOM R-03 → resolved CONFIRMED · conflict cleared by topology'],
+      ['CONFIRMED','ROOM R-01 enclosure → CONFIRMED · Hausdorff residual 0.6%']
+    ]},
+    {label:'redraw vs. source', ms:4600, reveal:['dims'], entries:[
+      ['CONFIRMED','DIMENSION 5600 → primary evidence · OCR confidence 0.97']
+    ]},
+    {label:'confidence decision', ms:2800, reveal:[], entries:[
+      ['CONFIRMED','GRID AXIS A / B / C → all CONFIRMED · independent family count ≥ 2']
+    ]},
+    {label:'layered DXF + ledger', ms:3400, reveal:[], entries:[
+      ['CONFIRMED','EXPORT → layered DXF written · provenance ledger closed, 14 entries']
+    ]}
+  ];
+
+  var groups = {
+    walls: document.querySelectorAll('.layer-walls path'),
+    openings: document.querySelectorAll('.layer-openings path'),
+    dims: document.querySelectorAll('.layer-dims path'),
+    rooms: document.querySelectorAll('.layer-rooms, .layer-labels'),
+    'grid-lines': document.querySelectorAll('.layer-grid path'),
+    'grid-marks': document.querySelectorAll('.layer-grid circle, .layer-grid text')
+  };
+  var dimTextEls = document.querySelectorAll('.layer-dims text');
+
+  function revealGroup(key){
+    var nodes = groups[key];
+    if(!nodes) return;
+    nodes.forEach(function(el){
+      el.classList.add(el.tagName === 'path' ? 'reveal' : 'show');
+    });
+    if(key === 'dims'){
+      dimTextEls.forEach(function(el){ el.classList.add('show'); });
+    }
+  }
+
+  function resetAll(){
+    Object.keys(groups).forEach(function(key){
+      groups[key].forEach(function(el){
+        el.classList.remove('reveal');
+        el.classList.remove('show');
+      });
+    });
+  }
+
+  var stageLabel = document.getElementById('stageLabel');
+  var stageIndex = document.getElementById('stageIndex');
+  var steps = document.querySelectorAll('#steps .step');
+  var feed = document.getElementById('feed');
+  var MAX_ENTRIES = 7;
+
+  var audioCtx = null;
+  var soundOn = false;
+  var soundBtn = document.getElementById('soundToggle');
+
+  function ensureAudio(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ return null; }
+    }
+    if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
+    return audioCtx;
+  }
+
+  soundBtn.addEventListener('click', function(){
+    var ctx = ensureAudio();
+    soundOn = !soundOn && !!ctx;
+    soundBtn.setAttribute('aria-pressed', String(soundOn));
+    soundBtn.textContent = soundOn ? '● sound' : '◌ sound';
+    if(soundOn) synthStage(4);
+  });
+
+  var limiter = null;
+  function getLimiter(ctx){
+    if(!limiter){
+      limiter = ctx.createDynamicsCompressor();
+      limiter.threshold.value = -20;
+      limiter.knee.value = 8;
+      limiter.ratio.value = 7;
+      limiter.attack.value = .001;
+      limiter.release.value = .08;
+      limiter.connect(ctx.destination);
+    }
+    return limiter;
+  }
+
+  function tap(ctx, master, t0, freq, gain){
+    var dur = .025 + Math.random() * .012;
+    var bufLen = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    var buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    for(var i = 0; i < bufLen; i++){ data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 0.6); }
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    var filt = ctx.createBiquadFilter();
+    filt.type = 'bandpass';
+    filt.frequency.value = freq;
+    filt.Q.value = 2.0;
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    src.connect(filt).connect(g).connect(master);
+    src.start(t0);
+
+    var osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq * 0.085;
+    var og = ctx.createGain();
+    og.gain.setValueAtTime(gain * 0.3, t0);
+    og.gain.exponentialRampToValueAtTime(.0001, t0 + dur * 1.6);
+    osc.connect(og).connect(master);
+    osc.start(t0);
+    osc.stop(t0 + dur * 1.6 + .02);
+  }
+
+  function keyFlurry(ctx, master, t0, count, freqBase, gain){
+    for(var i = 0; i < count; i++){
+      var jt = t0 + i * (0.026 + Math.random() * 0.018);
+      var f = freqBase * (0.92 + Math.random() * 0.18);
+      tap(ctx, master, jt, f, gain * (0.85 + Math.random() * 0.3));
+    }
+  }
+
+  function chime(ctx, master, t0, freq, gain){
+    var o1 = ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = freq; o1.detune.value = -3;
+    var o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = freq; o2.detune.value = 3;
+    var filt = ctx.createBiquadFilter();
+    filt.type = 'lowpass';
+    filt.frequency.value = freq * 2.3;
+    filt.Q.value = 0.5;
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(gain, t0 + .008);
+    g.gain.exponentialRampToValueAtTime(.0001, t0 + .09);
+    o1.connect(filt); o2.connect(filt); filt.connect(g).connect(master);
+    o1.start(t0); o2.start(t0);
+    o1.stop(t0 + .12); o2.stop(t0 + .12);
+  }
+
+  var STAGE_SOUND = [
+    function(c,m,t){ keyFlurry(c,m,t,2,2200,.05); },
+    function(c,m,t){ keyFlurry(c,m,t,2,2450,.05); },
+    function(c,m,t){ keyFlurry(c,m,t,4,2000,.045); },
+    function(c,m,t){ keyFlurry(c,m,t,3,1800,.045); },
+    function(c,m,t){ keyFlurry(c,m,t,5,1650,.05); chime(c,m,t+.22,1046.5,.04); },
+    function(c,m,t){ keyFlurry(c,m,t,3,2100,.045); },
+    function(c,m,t){ keyFlurry(c,m,t,3,2500,.045); },
+    function(c,m,t){ keyFlurry(c,m,t,4,1900,.045); },
+    function(c,m,t){ keyFlurry(c,m,t,6,1700,.05); chime(c,m,t+.26,1318.5,.045); },
+    function(c,m,t){ keyFlurry(c,m,t,4,2300,.045); },
+    function(c,m,t){ keyFlurry(c,m,t,3,2600,.05); chime(c,m,t+.15,1567.98,.045); },
+    function(c,m,t){ keyFlurry(c,m,t,4,2000,.05); chime(c,m,t+.20,2093,.04); }
+  ];
+
+  var LEDGER_SOUND = {
+    CONFIRMED: function(c,m,t){ tap(c,m,t,2600,.05); },
+    LIKELY:    function(c,m,t){ tap(c,m,t,2000,.035); },
+    AMBIGUOUS: function(c,m,t){ tap(c,m,t,1700,.04); tap(c,m,t+.045,1820,.03); }
+  };
+
+  function fire(recipeFn, extraDelay){
+    if(!soundOn || !audioCtx || !recipeFn) return;
+    try{
+      var ctx = audioCtx;
+      var t0 = ctx.currentTime + (extraDelay || 0) + Math.random() * .006;
+      var master = ctx.createGain();
+      master.gain.value = 1;
+      var dest = getLimiter(ctx);
+      var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      if(pan){ pan.pan.value = (Math.random() - 0.5) * 0.35; master.connect(pan); pan.connect(dest); }
+      else { master.connect(dest); }
+      recipeFn(ctx, master, t0);
+    } catch(e) { /* never let a bad node kill the rest of the interaction */ }
+  }
+
+  function synthStage(i){ fire(STAGE_SOUND[i]); }
+
+  function pushEntry(cls, html, delay){
+    fire(LEDGER_SOUND[cls], delay || 0);
+    var row = document.createElement('div');
+    row.className = 'entry';
+    row.innerHTML = '<span class="tag ' + cls + '">' + cls + '</span><span class="msg">' + html + '</span>';
+    feed.appendChild(row);
+    while(feed.children.length > MAX_ENTRIES){
+      feed.removeChild(feed.firstChild);
+    }
+  }
+
+  var HOLD_MS = reduced ? 0 : 6000;
+  var idx = 0;
+  var timer = null;
+
+  function playStage(i){
+    var s = stages[i];
+    synthStage(i);
+    stageLabel.textContent = s.label;
+    stageIndex.textContent = String(i).padStart(2,'0') + ' / 11';
+    steps.forEach(function(el, n){ el.classList.toggle('active', n === i); });
+    s.reveal.forEach(revealGroup);
+    s.entries.forEach(function(e, n){ pushEntry(e[0], e[1], n * .05); });
+  }
+
+  function cycle(){
+    if(reduced){
+      stages.forEach(function(s){ s.reveal.forEach(revealGroup); });
+      stageLabel.textContent = stages[stages.length-1].label;
+      stageIndex.textContent = '11 / 11';
+      steps[steps.length-1].classList.add('active');
+      pushEntry('CONFIRMED', 'Reduced motion → showing completed reconstruction.');
+      return;
+    }
+    idx = 0;
+    resetAll();
+    feed.innerHTML = '';
+    function step(){
+      if(idx >= stages.length){
+        timer = setTimeout(cycle, HOLD_MS);
+        return;
+      }
+      playStage(idx);
+      var ms = stages[idx].ms;
+      idx++;
+      timer = setTimeout(step, ms);
+    }
+    step();
+  }
+
+  cycle();
+})();
+</script>
